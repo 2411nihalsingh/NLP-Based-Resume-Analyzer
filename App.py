@@ -2,29 +2,25 @@ import streamlit as st
 import nltk
 import spacy
 nltk.download('stopwords')
-spacy.load('en_core_web_sm')
+nltk.download('punkt')
+nlp = spacy.load('en_core_web_sm')
 import sqlite3
 import pandas as pd
 import base64, random
 import time, datetime
+import pyresparser.resume_parser
 from pyresparser import ResumeParser
-from pdfminer3.layout import LAParams, LTTextBox
-from pdfminer3.pdfpage import PDFPage
-from pdfminer3.pdfinterp import PDFResourceManager
-from pdfminer3.pdfinterp import PDFPageInterpreter
-from pdfminer3.converter import TextConverter
+from pdfminer.layout import LAParams, LTTextBox
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
 import io, random
 from streamlit_tags import st_tags
 from PIL import Image
 # import pymysql
 from Courses import ds_course, web_course, android_course, ios_course, uiux_course, resume_videos, interview_videos
-import pafy
 import plotly.express as px
-import youtube_dl
-
-def fetch_yt_video(link):
-    video = pafy.new(link)
-    return video.title
 
 
 def get_table_download_link(df, filename, text):
@@ -88,8 +84,7 @@ cursor = connection.cursor()
 def insert_data(name, email, res_score, timestamp, no_of_pages, reco_field, cand_level, skills, recommended_skills,
                 courses):
     DB_table_name = 'user_data'
-    insert_sql = "insert into " + DB_table_name + """
-    values (0,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+    insert_sql = f"INSERT INTO {DB_table_name} VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     rec_values = (
     name, email, str(res_score), timestamp, str(no_of_pages), reco_field, cand_level, skills, recommended_skills,
     courses)
@@ -163,7 +158,11 @@ def run():
             with open(save_image_path, "wb") as f:
                 f.write(pdf_file.getbuffer())
             show_pdf(save_image_path)
-            nlp = spacy.load('en_core_web_sm')
+
+            original_spacy_load = spacy.load
+            # Monkey patch only inside pyresparser
+            pyresparser.resume_parser.spacy.load = lambda name: original_spacy_load("en_core_web_sm")
+            
             resume_data = ResumeParser(save_image_path).get_extracted_data()
             if resume_data:
                 ## Get the whole resume data
@@ -391,14 +390,16 @@ def run():
                 ## Resume writing video
                 st.header("**Bonus Video for Resume Writing Tips💡**")
                 resume_vid = random.choice(resume_videos)
-                res_vid_title = fetch_yt_video(resume_vid)
+                # res_vid_title = fetch_yt_video(resume_vid)
+                res_vid_title = "Suggested for you"
                 st.subheader("✅ **" + res_vid_title + "**")
                 st.video(resume_vid)
 
                 ## Interview Preparation Video
                 st.header("**Bonus Video for Interview👨‍💼 Tips💡**")
                 interview_vid = random.choice(interview_videos)
-                int_vid_title = fetch_yt_video(interview_vid)
+                # int_vid_title = fetch_yt_video(interview_vid)
+                int_vid_title = "Recommended"
                 st.subheader("✅ **" + int_vid_title + "**")
                 st.video(interview_vid)
 
