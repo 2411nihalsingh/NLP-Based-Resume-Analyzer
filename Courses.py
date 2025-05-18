@@ -41,6 +41,7 @@ ios_course = [['IOS App Development by LinkedIn','https://www.linkedin.com/learn
               ['Learn Swift by Codecademy','https://www.codecademy.com/learn/learn-swift'],
               ['Swift Tutorial - Full Course for Beginners [Free]','https://youtu.be/comQ1-x2a1Q'],
               ['Learn Swift Fast - [Free]','https://youtu.be/FcsY1YPBwzQ']]
+
 uiux_course = [['Google UX Design Professional Certificate','https://www.coursera.org/professional-certificates/google-ux-design'],
                ['UI / UX Design Specialization','https://www.coursera.org/specializations/ui-ux-design'],
                ['The Complete App Design Course - UX, UI and Design Thinking','https://www.udemy.com/course/the-complete-app-design-course-ux-and-ui-design/'],
