@@ -76,19 +76,51 @@ def get_grammar_suggestions_from_gemini(text: str) -> list:
 Here is the resume:
 {text}
 """
-
     response = model.generate_content(prompt)
-    raw_output = response.text.split("\n")
+    raw_output = response.text.strip()
     return raw_output
 
 def extract_mistakes_from_gemini(text):
     """
     Extracts all phrases before '→' symbol in the gemini output.
     """
-    pattern = r'(?:“|")(.+?)(?:”|")\s*→'
-    mistakes = re.findall(pattern, text)
+    raw_lines = text.strip().split("\n")
+    mistakes = []
+    for line in raw_lines:
+        if '->' in line:
+            parts = line.strip().split("->")
+            if len(parts) == 2:
+                mistake = parts[0].strip().strip('"')
+                mistakes.append(mistake)
     return mistakes
 
+def highlight_mistakes_in_pdf(uploaded_file, mistakes):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+        tmp_file.write(uploaded_file.read())
+        temp_path = tmp_file.name
+
+    doc = fitz.open(temp_path)
+
+    for page in doc:
+        for mistake in mistakes:
+            text_instances = page.search_for(mistake)
+            for inst in text_instances:
+                highlight = page.add_highlight_annot(inst)
+                highlight.set_info(title="Grammar Issue", content=f"{mistake}")
+                highlight.update()
+
+    highlighted_pdf_path = os.path.join(tempfile.gettempdir(), "highlighted_resume.pdf")
+    doc.save(highlighted_pdf_path, garbage=4, deflate=True, clean=True)
+    doc.close()
+    return highlighted_pdf_path
+
+def display_pdf(file_path):
+    with open(file_path, "rb") as f:
+        base64_pdf = base64.b64encode(f.read()).decode("utf-8")
+    pdf_display = f"""
+    <iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800px" type="application/pdf"></iframe>
+    """
+    st.markdown(pdf_display, unsafe_allow_html=True)
 
 if uploaded_file:
     extracted_text = extract_text_from_pdf(uploaded_file)
@@ -96,14 +128,13 @@ if uploaded_file:
     gemini_response = get_grammar_suggestions_from_gemini(preprocessed_text)
     
     if gemini_response:
+        # st.text(gemini_response)
+        mistakes = extract_mistakes_from_gemini(gemini_response)
         st.subheader("Grammer and spelling errors")
-        mistake_list = []
-        for suggestion in gemini_response:
-            if suggestion.strip():
-                st.markdown(f"🔸 {suggestion}")
-                mistake_list+= extract_mistakes_from_gemini(suggestion)
-        st.subheader("Mistakes in PDF")
-        st.text(mistake_list)
-        
-
-
+        for line in gemini_response.strip().split("\n"):
+            if "->" in line:
+                st.markdown(f"🔸 `{line.strip()}`")
+        st.subheader("Highlighted PDF with mistakes")
+        uploaded_file.seek(0)
+        highlighted_pdf_path = highlight_mistakes_in_pdf(uploaded_file,mistakes)
+        display_pdf(highlighted_pdf_path)
