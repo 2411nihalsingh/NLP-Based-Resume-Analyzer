@@ -19,7 +19,6 @@ model = GenerativeModel("gemini-1.5-flash")  # Use 'gemini-flash' if needed
 st.title("📄 Resume Grammar & Spelling Checker")
 uploaded_file = st.file_uploader("Upload your resume (PDF)", type="pdf")
 
-
 def extract_text_from_pdf(uploaded_file) -> str:
     """
     Save uploaded PDF temporarily and extract full text.
@@ -186,9 +185,11 @@ if uploaded_file:
         # st.text(gemini_response)
         mistakes = extract_mistakes_from_gemini(gemini_response)
         st.subheader("Grammer and spelling errors")
+
         for line in gemini_response.strip().split("\n"):
             if "->" in line:
                 st.markdown(f"🔸 `{line.strip()}`")
+                
         st.subheader("Highlighted PDF with mistakes")
         uploaded_file.seek(0)
         highlighted_pdf_path = highlight_mistakes_in_pdf(uploaded_file,mistakes)
