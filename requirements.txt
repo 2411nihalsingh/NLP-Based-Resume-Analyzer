@@ -13,3 +13,5 @@ pdfminer3
 spacy==2.3.9
 yt-dlp
 fpdf
+requests
+beautifulsoup4

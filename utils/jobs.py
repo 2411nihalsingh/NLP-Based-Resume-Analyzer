@@ -1,95 +1,96 @@
 import streamlit as st
-from typing import List, Dict
+import requests
+import os
+from dotenv import load_dotenv
+from datetime import datetime
 
-# Define job portals
-PORTALS = [
-    {
-        "name": "LinkedIn",
-        "icon": "🔗",
-        "color": "#0A66C2",
-        "url": "https://www.linkedin.com/jobs/search/?keywords={}&location={}",
-    },
-    {
-        "name": "Naukri",
-        "icon": "🏢",
-        "color": "#FF7555",
-        "url": "https://www.naukri.com/{}-jobs-in-{}",
-    },
-    {
-        "name": "Foundit (Monster)",
-        "icon": "🌐",
-        "color": "#5D3FD3",
-        "url": "https://www.foundit.in/srp/results?query={}&locations={}",
-    },
-    {
-        "name": "FreshersWorld",
-        "icon": "🎓",
-        "color": "#003A9B",
-        "url": "https://www.freshersworld.com/jobs/jobsearch/{}-jobs-in-{}",
-    },
-    {
-        "name": "TimesJobs",
-        "icon": "💼",
-        "color": "#003A9B",
-        "url": "https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords={}&txtLocation={}",
-    },
-    {
-        "name": "Instahyre",
-        "icon": "🧑‍💼",
-        "color": "#003A9B",
-        "url": "https://www.instahyre.com/{}-jobs-in-{}",
-    },
-    {
-        "name": "Indeed",
-        "icon": "💰",
-        "color": "#003A9B",
-        "url": "https://in.indeed.com/jobs?q={}&l={}",
+load_dotenv()
+
+# Function to fetch job search results and get job_ids
+def search_jobs(job_title, location):
+    url = "https://jsearch.p.rapidapi.com/search"
+    querystring = {
+        "query": f"{job_title} in {location}",
+        "page": "1",
+        "num_pages": "1"
     }
-]
 
-def format_query(s: str) -> str:
-    return s.strip().replace(" ", "+")
+    headers = {
+        "x-rapidapi-key": os.getenv("RAPID_API_KEY"),
+        "x-rapidapi-host": "jsearch.p.rapidapi.com"
+    }
 
-def search_jobs(job_title: str, location: str) -> List[Dict]:
-    job = format_query(job_title)
-    loc = format_query(location)
+    response = requests.get(url, headers=headers, params=querystring)
+    if response.status_code != 200:
+        return [], f"Search Error: {response.status_code}"
 
-    results = []
-    for portal in PORTALS:
-        try:
-            url = portal["url"].format(job, loc)
-            results.append({
-                "portal": portal["name"],
-                "icon": portal["icon"],
-                "color": portal["color"],
-                "url": url
-            })
-        except Exception as e:
-            print(f"Error building URL for {portal['name']}: {e}")
-    return results
+    return response.json().get("data", []), None
 
-# --- Streamlit UI ---
-st.set_page_config(page_title="Job Search Portal", layout="centered")
+# Function to fetch job details by job_id
+def get_job_details(job_id):
+    url = "https://jsearch.p.rapidapi.com/job-details"
+    querystring = {
+        "job_id": job_id,
+        "country": "us"
+    }
 
-st.title("🔍 Job Search Links Generator")
+    headers = {
+        "x-rapidapi-key": os.getenv("RAPID_API_KEY"),
+        "x-rapidapi-host": "jsearch.p.rapidapi.com"
+    }
 
-job_title = st.text_input("Enter Job Title (e.g., Data Scientist)")
-location = st.text_input("Enter Location (e.g., Bangalore)")
+    response = requests.get(url, headers=headers, params=querystring)
+    if response.status_code != 200:
+        return None
 
-if st.button("Generate Links"):
-    if job_title and location:
-        links = search_jobs(job_title, location)
-        st.success(f"Showing job links for **{job_title}** in **{location}**")
+    data = response.json().get("data", [])
+    return data[0] if data else None
 
-        for link in links:
-            st.markdown(
-                f"""
-                <div style="background-color:{link['color']}; padding:10px; border-radius:10px; margin:10px 0;">
-                    <h4 style="color:white;">{link['icon']} {link['portal']}</h4>
-                    <a href="{link['url']}" target="_blank" style="color:white; text-decoration:underline;">View Jobs</a>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+# Streamlit UI
+st.title("🔍Job Finder")
+
+job_title = st.text_input("💼 Enter Job Title / Keyword", "Web Developer")
+location = st.text_input("📍 Enter Location", "Remote")
+
+if st.button("Search Jobs"):
+    if not job_title:
+        st.warning("Please ensure job title is provided.")
     else:
-        st.warning("Please enter both Job Title and Location.")
+        with st.spinner("🔎 Searching for jobs..."):
+            jobs, error = search_jobs(job_title, location)
+
+            if error:
+                st.error(error)
+            elif not jobs:
+                st.info("No jobs found.")
+            else:
+                st.success(f"Found {len(jobs)} jobs!")
+                for job in jobs[:5]:
+                    job_id = job.get("job_id")
+                    detail = get_job_details(job_id)
+                    if not detail:
+                        # st.warning("⚠️ Failed to fetch job details for one of the jobs.")
+                        continue
+                    try:
+                        st.subheader(detail.get("job_title", "N/A"))
+                        st.markdown(f"**Company:** {detail.get('employer_name', 'N/A')}")
+                        st.markdown(f"**Location:** {detail.get('job_location', 'N/A')}")
+                        st.markdown(f"**Type:** {detail.get('job_employment_type', 'N/A')}")
+                        
+                        posted_ts = detail.get("job_posted_at_datetime_utc")
+                        if posted_ts:
+                            posted_date = datetime.strptime(posted_ts, "%Y-%m-%dT%H:%M:%S.%fZ")
+                            st.markdown(f"**Posted:** {posted_date.strftime('%b %d, %Y')}")
+                        else:
+                            st.markdown("**Posted:** N/A")
+
+                        apply_link = detail.get("job_apply_link", "#")
+                        st.markdown(f"**Apply Link:** [Click here]({apply_link})")
+
+                        desc = detail.get("job_description", "No description available.")
+                        st.markdown("**Description:**")
+                        st.write(desc[:500] + "...")
+                        st.markdown("---")
+                    except Exception as e:
+                        # st.warning("⚠️ Error displaying one of the jobs.")
+                        continue
