@@ -51,7 +51,7 @@ st.title("🔍Job Finder")
 
 job_title = st.text_input("💼 Enter Job Title / Keyword", "Web Developer")
 location = st.text_input("📍 Enter Location", "Remote")
-
+## added page
 if st.button("Search Jobs"):
     if not job_title:
         st.warning("Please ensure job title is provided.")
