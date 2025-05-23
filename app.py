@@ -13,7 +13,7 @@ if app_mode == "Homepage":
     homepage.run()
 
 elif app_mode == "ATS Score Check":
-    st.title("You are on Ats page")
+    ats_check.run()
 
 elif app_mode == "Grammar Checker":
     grammar_checker.run()
