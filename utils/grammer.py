@@ -290,6 +290,14 @@ def display_ats():
                 st.markdown(f"- {point}")
         else:
             st.warning("Please upload your resume and Job description")
+        st.subheader("You can also create a personalized Cover Letter on the basis of you current resume")
+
+
+        job_desc = st.text_input("Paste your job description here")
+
+        if job_desc:
+            generated_cover_letter = generate_cover_letter_with_gemini(preprocessed_text,job_desc)
+            display_cover_letter(generated_cover_letter)
 
 def display_grammer():
  
