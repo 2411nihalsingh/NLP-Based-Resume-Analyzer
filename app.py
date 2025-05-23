@@ -1,5 +1,5 @@
 import streamlit as st
-from sections import homepage,ats_check,grammer_checker,jobs
+from sections import grammar_checker, homepage,ats_check,jobs
 
 st.set_page_config(page_title="Resume Analyzer", layout="wide",page_icon="🤖")
 
@@ -16,7 +16,7 @@ elif app_mode == "ATS Score Check":
     st.title("You are on Ats page")
 
 elif app_mode == "Grammar Checker":
-    grammer_checker.run()
+    grammar_checker.run()
 
 elif app_mode == "Find Jobs":
     jobs.run()
