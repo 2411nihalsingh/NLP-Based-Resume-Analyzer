@@ -227,10 +227,10 @@ def run():
 
             st.subheader("You can also create a personalized Cover Letter on the basis of you current resume")
 
-            job_desc = st.text_input("Paste your job description here")
+            cover_letter_button = st.button("Generate Cover Letter")
 
-            if job_desc:
-                generated_cover_letter = generate_cover_letter_with_gemini(preprocessed_text,job_desc)
+            if cover_letter_button and job_text:
+                generated_cover_letter = generate_cover_letter_with_gemini(preprocessed_text,job_text)
                 display_cover_letter(generated_cover_letter)
 
         else:
