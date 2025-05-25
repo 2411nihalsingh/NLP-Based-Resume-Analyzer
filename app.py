@@ -1,10 +1,5 @@
 import streamlit as st
 from sections import grammar_checker, homepage,ats_check,jobs,admin_panel
-import spacy
-import nltk
-nltk.download('stopwords')
-nltk.download('punkt')
-nlp = spacy.load('en_core_web_sm')
 
 st.set_page_config(page_title="Resume Analyzer", layout="wide",page_icon="🤖")
 
