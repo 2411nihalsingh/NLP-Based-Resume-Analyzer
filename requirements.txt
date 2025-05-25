@@ -16,3 +16,4 @@ fpdf
 requests
 beautifulsoup4
 PyMuPDF
+python-dotenv
