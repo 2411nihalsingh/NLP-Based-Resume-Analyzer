@@ -15,3 +15,4 @@ yt-dlp
 fpdf
 requests
 beautifulsoup4
+PyMuPDF
