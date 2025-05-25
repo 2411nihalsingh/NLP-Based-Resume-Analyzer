@@ -5,9 +5,8 @@ nltk.download('stopwords')
 nltk.download('punkt')
 nlp = spacy.load('en_core_web_sm')
 import sqlite3
-import pandas as pd
 import base64, random
-import time, datetime
+import time, datetime,re
 import pyresparser.resume_parser
 from pyresparser import ResumeParser
 from pdfminer.layout import LAParams, LTTextBox
@@ -20,7 +19,6 @@ from streamlit_tags import st_tags
 from PIL import Image
 # import pymysql
 from Courses import ds_course, web_course, android_course, ios_course, uiux_course, resume_videos, interview_videos
-import plotly.express as px
 
 def pdf_reader(file):
     resource_manager = PDFResourceManager()
@@ -63,6 +61,79 @@ def course_recommender(course_list):
             break
     return rec_course
 
+def get_word_count(resume_text):
+    doc = nlp(resume_text)
+    return len([token.text for token in doc if token.is_alpha])
+
+def extract_experience(resume_text):
+    matches = re.findall(r'(?i)(\b(19|20)\d{2})', resume_text)
+    years = sorted(set(int(m[0]) for m in matches))
+    if len(years) >= 2:
+        return max(years) - min(years)
+    elif len(years) == 1:
+        return datetime.now().year - years[0]
+    return None
+
+def extract_skills(resume_text):
+    skills_db = [
+        "python", "java", "c++", "sql", "machine learning", "deep learning", "data analysis",
+        "nlp", "computer vision", "tensorflow", "keras", "pytorch", "excel", "power bi",
+        "tableau", "communication", "teamwork", "leadership"
+    ]
+    return list({skill for skill in skills_db if skill.lower() in resume_text.lower()})
+
+def analyze_resume(resume_text):
+    score = 0
+    suggestions = []
+
+    # Word count score
+    word_count = get_word_count(resume_text)
+    if word_count < 100:
+        suggestions.append("Your resume is too short. Add more content.")
+    elif word_count > 1500:
+        suggestions.append("Your resume is too long. Try to summarize it.")
+    else:
+        score += 20
+
+    # Experience score
+    exp_years = extract_experience(resume_text)
+    if exp_years is None:
+        suggestions.append("Couldn't detect your experience. Add timelines with years.")
+    elif exp_years >= 5:
+        score += 20
+    elif exp_years >= 2:
+        score += 10
+    else:
+        score += 5
+
+    # Skills score
+    skills_found = extract_skills(resume_text)
+    if len(skills_found) >= 10:
+        score += 30
+    elif len(skills_found) >= 5:
+        score += 15
+    else:
+        suggestions.append("Add more relevant technical and soft skills.")
+
+    # Projects section
+    if "project" in resume_text.lower():
+        score += 10
+    else:
+        suggestions.append("Include your projects to showcase hands-on work.")
+
+    # Achievements section
+    if "achievement" in resume_text.lower():
+        score += 10
+    else:
+        suggestions.append("Include achievements to demonstrate results and impact.")
+
+    return {
+        "score": min(score, 100),
+        "word_count": word_count,
+        "experience": exp_years if exp_years is not None else 0,
+        "skills": skills_found,
+        "suggestions": suggestions
+        }
 
 connection = sqlite3.connect("resume_parser.db",check_same_thread=False)
 cursor = connection.cursor()
@@ -305,78 +376,28 @@ def run():
 
             ### Resume writing recommendation
             st.subheader("**Resume Tips & Ideas💡**")
-            resume_score = 0
-            if 'Objective' in resume_text:
-                resume_score = resume_score + 20
-                st.markdown(
-                    '''<h4 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Objective</h4>''',
-                    unsafe_allow_html=True)
-            else:
-                st.markdown(
-                    '''<h4 style='text-align: left; color: #fabc10;'>[-] According to our recommendation please add your career objective, it will give your career intension to the Recruiters.</h4>''',
-                    unsafe_allow_html=True)
+            st.subheader("📊 ATS Resume Score")
+            analysis_result = analyze_resume(resume_text)
 
-            if 'Declaration' in resume_text:
-                resume_score = resume_score + 20
-                st.markdown(
-                    '''<h4 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added Delcaration✍/h4>''',
-                    unsafe_allow_html=True)
-            else:
-                st.markdown(
-                    '''<h4 style='text-align: left; color: #fabc10;'>[-] According to our recommendation please add Declaration✍. It will give the assurance that everything written on your resume is true and fully acknowledged by you</h4>''',
-                    unsafe_allow_html=True)
+            st.markdown(f"""
+                <div style="border:1px solid #ddd; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #4CAF50;">Your ATS Score: {analysis_result['score']} / 100</h3>
+                    <p><strong>Word Count:</strong> {analysis_result['word_count']}</p>
+                    <p><strong>Years of Experience:</strong> {analysis_result['experience']}</p>
+                    <p><strong>Detected Skills:</strong> {', '.join(analysis_result['skills'])}</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
 
-            if 'Hobbies' or 'Interests' in resume_text:
-                resume_score = resume_score + 20
-                st.markdown(
-                    '''<h4 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Hobbies⚽</h4>''',
-                    unsafe_allow_html=True)
-            else:
-                st.markdown(
-                    '''<h4 style='text-align: left; color: #fabc10;'>[-] According to our recommendation please add Hobbies⚽. It will show your persnality to the Recruiters and give the assurance that you are fit for this role or not.</h4>''',
-                    unsafe_allow_html=True)
+            if analysis_result["suggestions"]:
+                st.warning("💡 Suggestions to Improve Your Resume:")
+                for suggestion in analysis_result["suggestions"]:
+                    st.markdown(f"-{suggestion}")
 
-            if 'Achievements' in resume_text:
-                resume_score = resume_score + 20
-                st.markdown(
-                    '''<h4 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Achievements🏅 </h4>''',
-                    unsafe_allow_html=True)
-            else:
-                st.markdown(
-                    '''<h4 style='text-align: left; color: #fabc10;'>[-] According to our recommendation please add Achievements🏅. It will show that you are capable for the required position.</h4>''',
-                    unsafe_allow_html=True)
-
-            if 'Projects' in resume_text:
-                resume_score = resume_score + 20
-                st.markdown(
-                    '''<h4 style='text-align: left; color: #1ed760;'>[+] Awesome! You have added your Projects👨‍💻 </h4>''',
-                    unsafe_allow_html=True)
-            else:
-                st.markdown(
-                    '''<h4 style='text-align: left; color: #fabc10;'>[-] According to our recommendation please add Projects👨‍💻. It will show that you have done work related the required position or not.</h4>''',
-                    unsafe_allow_html=True)
-
-            st.subheader("**Resume Score📝**")
-            st.markdown(
-                """
-                <style>
-                    .stProgress > div > div > div > div {
-                        background-color: #d73b5c;
-                    }
-                </style>""",
-                unsafe_allow_html=True,
-            )
-            my_bar = st.progress(0)
-            score = 0
-            for percent_complete in range(resume_score):
-                score += 1
-                time.sleep(0.1)
-                my_bar.progress(percent_complete + 1)
-            st.success('** Your Resume Writing Score: ' + str(score) + '**')
             st.warning(
                 "** Note: This score is calculated based on the content that you have added in your Resume. **")
 
-            insert_data(resume_data['name'], resume_data['email'], str(resume_score), timestamp,
+            insert_data(resume_data['name'], resume_data['email'], str(analysis_result['score']), timestamp,
                         str(resume_data['no_of_pages']), reco_field, cand_level, str(resume_data['skills']),
                         str(recommended_skills), str(rec_course))
 
@@ -389,7 +410,7 @@ def run():
             st.video(resume_vid)
 
             ## Interview Preparation Video
-            st.header("**Bonus Video for Interview👨‍💼 Tips💡**")
+            st.header("**Bonus Video for Interview👨 Tips💡**")
             interview_vid = random.choice(interview_videos)
             # int_vid_title = fetch_yt_video(interview_vid)
             int_vid_title = "Recommended"
