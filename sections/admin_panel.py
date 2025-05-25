@@ -3,7 +3,10 @@ import sqlite3
 import plotly.express as px
 import pandas as pd
 import base64
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 def get_table_download_link(df, filename, text):
     """Generates a link allowing the data in a given panda dataframe to be downloaded
@@ -28,7 +31,7 @@ def run():
     ad_password = st.text_input("Password", type='password')
     
     if st.button('Login'):
-        if ad_user == 'nihal_bro' and ad_password == 'test123':
+        if ad_user == os.getenv("USER_ID") and ad_password == os.getenv("PASSWORD"):
             st.success("Welcome Nihal")
             # Display Data
             cursor.execute('''SELECT*FROM user_data''')
