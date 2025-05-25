@@ -225,13 +225,10 @@ def run():
             for point in parsed_response["weaknesses"]:
                 st.markdown(f"- {point}")
 
-            st.subheader("You can also create a personalized Cover Letter on the basis of you current resume")
+            st.subheader("Here is your personalized Cover Letter on the basis of you current resume and job description")
 
-            cover_letter_button = st.button("Generate Cover Letter")
-
-            if cover_letter_button and job_text:
-                generated_cover_letter = generate_cover_letter_with_gemini(preprocessed_text,job_text)
-                display_cover_letter(generated_cover_letter)
+            generated_cover_letter = generate_cover_letter_with_gemini(preprocessed_text,job_text)
+            display_cover_letter(generated_cover_letter)
 
         else:
             st.warning("Please upload your resume and Job description")

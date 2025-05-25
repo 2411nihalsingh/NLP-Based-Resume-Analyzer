@@ -108,13 +108,13 @@ def run():
 
     cursor.execute(table_sql)
       
-    pdf_file = st.file_uploader("Choose your Resume", type=["pdf"])
-    if pdf_file is not None:
+    uploaded_file = st.file_uploader("Choose your Resume", type=["pdf"])
+    if uploaded_file is not None:
         # with st.spinner('Uploading your Resume....'):
         #     time.sleep(4)
-        save_image_path = './Uploaded_Resumes/' + pdf_file.name
+        save_image_path = './Uploaded_Resumes/' + uploaded_file.name
         with open(save_image_path, "wb") as f:
-            f.write(pdf_file.getbuffer())
+            f.write(uploaded_file.getbuffer())
         show_pdf(save_image_path)
 
         original_spacy_load = spacy.load
@@ -375,7 +375,6 @@ def run():
             st.success('** Your Resume Writing Score: ' + str(score) + '**')
             st.warning(
                 "** Note: This score is calculated based on the content that you have added in your Resume. **")
-            st.balloons()
 
             insert_data(resume_data['name'], resume_data['email'], str(resume_score), timestamp,
                         str(resume_data['no_of_pages']), reco_field, cand_level, str(resume_data['skills']),

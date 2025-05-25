@@ -130,8 +130,9 @@ def run():
         extracted_text = extract_text_from_pdf(uploaded_file)
         preprocessed_text = preprocess_resume_text(extracted_text)
         gemini_response = get_grammar_suggestions_from_gemini(preprocessed_text)
-        
-        if gemini_response:
+
+        check_grammer = st.button("View Errors")
+        if check_grammer and gemini_response:
             # st.text(gemini_response)
             mistakes = extract_mistakes_from_gemini(gemini_response)
             st.subheader("Grammer and spelling errors")

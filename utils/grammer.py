@@ -325,10 +325,10 @@ def display_grammer():
 
             st.subheader("You can also create a personalized Cover Letter on the basis of you current resume")
             job_desc = st.text_input("Paste your job description here")
-
-            if job_desc:
+            create_letter = st.button("Letter")
+            if create_letter and job_desc:
                 generated_cover_letter = generate_cover_letter_with_gemini(preprocessed_text,job_desc)
                 display_cover_letter(generated_cover_letter)
 
-# display_ats()
-display_grammer()
+# display_grammer()
+display_ats()
