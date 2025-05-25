@@ -184,9 +184,15 @@ def run():
                                             'Quantitative Analysis', 'Web Scraping', 'ML Algorithms', 'Keras',
                                             'Pytorch', 'Probability', 'Scikit-learn', 'Tensorflow', "Flask",
                                             'Streamlit']
-                    recommended_keywords = st_tags(label='### Recommended skills for you.',
+                    
+                    existing_skills = [skill.lower() for skill in resume_data['skills']]
+                    missing_skills = [skill for skill in recommended_skills if skill.lower() not in existing_skills]
+
+                    if missing_skills:
+                        recommended_keywords = st_tags(label='### Recommended skills for you.',
                                                     text='Recommended skills generated from System',
-                                                    value=recommended_skills, key='2')
+                                                    value=missing_skills, key='2')
+
                     st.markdown(
                         '''<h4 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost🚀 the chances of getting a Job💼</h4>''',
                         unsafe_allow_html=True)
@@ -200,9 +206,16 @@ def run():
                     st.success("** Our analysis says you are looking for Web Development Jobs **")
                     recommended_skills = ['React', 'Django', 'Node JS', 'React JS', 'php', 'laravel', 'Magento',
                                             'wordpress', 'Javascript', 'Angular JS', 'c#', 'Flask', 'SDK']
-                    recommended_keywords = st_tags(label='### Recommended skills for you.',
+                    
+                    
+                    existing_skills = [skill.lower() for skill in resume_data['skills']]
+                    missing_skills = [skill for skill in recommended_skills if skill.lower() not in existing_skills]
+
+                    if missing_skills:
+                        recommended_keywords = st_tags(label='### Recommended skills for you.',
                                                     text='Recommended skills generated from System',
-                                                    value=recommended_skills, key='3')
+                                                    value=missing_skills, key='2')
+                        
                     st.markdown(
                         '''<h4 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost🚀 the chances of getting a Job💼</h4>''',
                         unsafe_allow_html=True)
@@ -219,6 +232,16 @@ def run():
                     recommended_keywords = st_tags(label='### Recommended skills for you.',
                                                     text='Recommended skills generated from System',
                                                     value=recommended_skills, key='4')
+                    
+                    
+                    existing_skills = [skill.lower() for skill in resume_data['skills']]
+                    missing_skills = [skill for skill in recommended_skills if skill.lower() not in existing_skills]
+
+                    if missing_skills:
+                        recommended_keywords = st_tags(label='### Recommended skills for you.',
+                                                    text='Recommended skills generated from System',
+                                                    value=missing_skills, key='2')
+                        
                     st.markdown(
                         '''<h4 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost🚀 the chances of getting a Job💼</h4>''',
                         unsafe_allow_html=True)
@@ -233,9 +256,15 @@ def run():
                     recommended_skills = ['IOS', 'IOS Development', 'Swift', 'Cocoa', 'Cocoa Touch', 'Xcode',
                                             'Objective-C', 'SQLite', 'Plist', 'StoreKit', "UI-Kit", 'AV Foundation',
                                             'Auto-Layout']
-                    recommended_keywords = st_tags(label='### Recommended skills for you.',
+ 
+                    
+                    existing_skills = [skill.lower() for skill in resume_data['skills']]
+                    missing_skills = [skill for skill in recommended_skills if skill.lower() not in existing_skills]
+
+                    if missing_skills:
+                        recommended_keywords = st_tags(label='### Recommended skills for you.',
                                                     text='Recommended skills generated from System',
-                                                    value=recommended_skills, key='5')
+                                                    value=missing_skills, key='2')
                     st.markdown(
                         '''<h4 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost🚀 the chances of getting a Job💼</h4>''',
                         unsafe_allow_html=True)
@@ -251,9 +280,16 @@ def run():
                                             'Prototyping', 'Wireframes', 'Storyframes', 'Adobe Photoshop', 'Editing',
                                             'Illustrator', 'After Effects', 'Premier Pro', 'Indesign', 'Wireframe',
                                             'Solid', 'Grasp', 'User Research']
-                    recommended_keywords = st_tags(label='### Recommended skills for you.',
+                    
+                    
+                    existing_skills = [skill.lower() for skill in resume_data['skills']]
+                    missing_skills = [skill for skill in recommended_skills if skill.lower() not in existing_skills]
+
+                    if missing_skills:
+                        recommended_keywords = st_tags(label='### Recommended skills for you.',
                                                     text='Recommended skills generated from System',
-                                                    value=recommended_skills, key='6')
+                                                    value=missing_skills, key='2')
+                        
                     st.markdown(
                         '''<h4 style='text-align: left; color: #1ed760;'>Adding this skills to resume will boost🚀 the chances of getting a Job💼</h4>''',
                         unsafe_allow_html=True)
