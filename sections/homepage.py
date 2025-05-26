@@ -164,8 +164,8 @@ def run():
     table_sql = f"""
                 CREATE TABLE IF NOT EXISTS {DB_table_name} (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                Name TEXT,
-                Email_ID TEXT,
+                Name TEXT NOT NULL,
+                Email_ID TEXT NOT NULL,
                 resume_score TEXT NOT NULL,
                 Timestamp TEXT NOT NULL,
                 Page_no TEXT NOT NULL,
@@ -397,7 +397,7 @@ def run():
             st.warning(
                 "** Note: This score is calculated based on the content that you have added in your Resume. **")
 
-            insert_data(resume_data['name'], resume_data['email'], str(analysis_result['score']), timestamp,
+            insert_data(resume_data['name'] or "N/A", resume_data['email'] or "N/A", str(analysis_result['score']), timestamp,
                         str(resume_data['no_of_pages']), reco_field, cand_level, str(resume_data['skills']),
                         str(recommended_skills), str(rec_course))
 
