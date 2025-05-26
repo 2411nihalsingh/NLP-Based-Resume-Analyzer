@@ -5,19 +5,19 @@ nltk.download('stopwords')
 nltk.download('punkt')
 nlp = spacy.load('sections/models/en_core_web_sm/en_core_web_sm-2.3.1')
 import sqlite3
-import base64, random
+import random
 import time, datetime,re
 import pyresparser.resume_parser
 from pyresparser import ResumeParser
-from pdfminer.layout import LAParams, LTTextBox
+from pdfminer.layout import LAParams
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import TextConverter
 from pdfminer.layout import LAParams
 import io, random
+import fitz
 from streamlit_tags import st_tags
 from PIL import Image
-# import pymysql
 from Courses import ds_course, web_course, android_course, ios_course, uiux_course, resume_videos, interview_videos
 
 def pdf_reader(file):
@@ -40,11 +40,11 @@ def pdf_reader(file):
 
 
 def show_pdf(file_path):
-    with open(file_path, "rb") as f:
-        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-    # pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf">'
-    pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
-    st.markdown(pdf_display, unsafe_allow_html=True)
+    doc = fitz.open(file_path)
+    for page in doc:
+        pix = page.get_pixmap()
+        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        st.image(img)
 
 
 def course_recommender(course_list):
