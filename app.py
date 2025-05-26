@@ -13,7 +13,7 @@ if app_mode == "Homepage":
 elif app_mode == "ATS Score Check":
     ats_check.run()
 
-elif app_mode == "Grammar Checker":
+elif app_mode == "Grammar Correction":
     grammar_checker.run()
 
 elif app_mode == "Find Jobs":
