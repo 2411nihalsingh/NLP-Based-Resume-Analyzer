@@ -17,6 +17,7 @@ from pdfminer.layout import LAParams
 import io, random
 from streamlit_tags import st_tags
 from PIL import Image
+import streamlit.components.v1 as components
 # import pymysql
 from Courses import ds_course, web_course, android_course, ios_course, uiux_course, resume_videos, interview_videos
 
@@ -42,10 +43,11 @@ def pdf_reader(file):
 def show_pdf(file_path):
     with open(file_path, "rb") as f:
         base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-    # pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf">'
-    pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf"></iframe>'
-    st.markdown(pdf_display, unsafe_allow_html=True)
-
+    pdf_display = f"""
+        <iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf">
+        </iframe>
+    """
+    components.html(pdf_display, height=1000, scrolling=True)
 
 def course_recommender(course_list):
     st.subheader("**Courses & Certificates🎓 Recommendations**")
