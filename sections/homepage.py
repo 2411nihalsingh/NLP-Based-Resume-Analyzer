@@ -9,7 +9,6 @@ import random
 import time, datetime,re
 import pyresparser.resume_parser
 from pyresparser import ResumeParser
-from pdfminer.layout import LAParams
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import TextConverter
